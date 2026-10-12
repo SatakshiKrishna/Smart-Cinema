@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Manage Theatres - Smart Cinema
+    </title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+<body>
+
+
+{% include 'partials/navigation.html' %}
+
+
+<main id="main-content" tabindex="-1" class="container page-section">
+
+
+    {% with messages = get_flashed_messages() %}
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="alert alert-info shadow-sm">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+
+            <h1 class="section-title">
+                Theatres
+            </h1>
+
+            <p class="section-subtitle mb-0">
+
+                Manage cinema locations and
+                the screens available at each theatre.
+
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('admin_add_theatre') }}"
+            class="btn btn-primary btn-lg"
+        >
+            + Add Theatre
+        </a>
+
+    </div>
+
+
+    {% if theatres %}
+
+        <div class="row">
+
+
+            {% for theatre in theatres %}
+
+                <div class="col-md-6 col-xl-4 mb-4">
+
+                    <div class="card admin-action-card shadow-sm h-100">
+
+                        <div class="card-body p-4">
+
+                            
+
+
+                            <h4 class="card-title">
+                                {{ theatre.theatre_name }}
+                            </h4>
+
+
+                            <p class="mb-2">
+
+                                <strong>
+                                    City:
+                                </strong>
+
+                                {{ theatre.city }}
+
+                            </p>
+
+
+                            <p class="mb-3">
+
+                                <strong>
+                                    Address:
+                                </strong>
+
+                                {{ theatre.address }}
+
+                            </p>
+                            <p class="sc-meta">{% if theatre.latitude is not none and theatre.longitude is not none %}Location coordinates saved{% else %}No coordinates yet — city search still works{% endif %}</p>
+
+
+                            <div class="d-flex align-items-center gap-2 mb-4">
+
+                                <span class="badge bg-primary">
+
+                                    {{ theatre.screen_count }}
+
+                                    {% if theatre.screen_count == 1 %}
+                                        Screen
+                                    {% else %}
+                                        Screens
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="action-buttons">
+
+                                <a
+                                    href="{{ url_for('admin_screens', theatre_id=theatre.theatre_id) }}"
+                                    class="btn btn-primary"
+                                >
+                                    Manage Screens
+                                </a>
+
+
+                                <a
+                                    href="{{ url_for('admin_edit_theatre', theatre_id=theatre.theatre_id) }}"
+                                    class="btn btn-outline-secondary"
+                                >
+                                    Edit
+                                </a>
+
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('admin_delete_theatre', theatre_id=theatre.theatre_id) }}"
+                                    onsubmit="return confirm('Delete this theatre? This may fail if related records exist.');"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-outline-danger"
+                                    >
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+
+        </div>
+
+
+    {% else %}
+
+        <div class="card shadow-sm">
+
+            <div class="card-body text-center p-5">
+
+                
+
+                <h3>
+                    No Theatres Added
+                </h3>
+
+                <p class="text-muted">
+
+                    Add a cinema location before
+                    creating screens and scheduling shows.
+
+                </p>
+
+                <a
+                    href="{{ url_for('admin_add_theatre') }}"
+                    class="btn btn-primary"
+                >
+                    Add Theatre
+                </a>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+</main>
+
+
+{% include 'partials/footer.html' %}
+<script src="{{ url_for('static', filename='js/ui.js') }}" defer></script>
+</body>
+
+</html>

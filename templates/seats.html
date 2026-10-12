@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Choose seats · {{ show.title }} · SmartCinema{% endblock %}
+{% block content %}
+<a class="sc-back" href="{{ url_for('movie_shows', movie_id=show.movie_id) }}">← Change show</a>
+<div class="sc-page-heading"><h1>Make the best seats yours.</h1><p>{{ show.title }} · {{ show.theatre_name }} · {{ show.screen_name }} · {{ show.show_date }} · {{ show.show_time }}</p></div>
+<ol class="sc-steps" aria-label="Booking progress"><li>1 · Show selected</li><li aria-current="step">2 · Choose seats</li><li>3 · Payment</li></ol>
+<div class="sc-booking-layout" data-seat-picker data-price="{{ current_price }}">
+  <section class="card sc-auditorium" aria-labelledby="seat-heading"><h2 id="seat-heading">Choose your seats</h2><div class="screen-box">SCREEN THIS WAY</div><p class="text-center text-muted">₹{{ current_price }} per seat · Current dynamic price</p>
+    <div class="seat-legend"><span><i class="seat-legend-box seat-legend-available"></i>Available</span><span><i class="seat-legend-box seat-legend-selected"></i>Selected</span><span><i class="seat-legend-box seat-legend-booked"></i>Booked</span></div>
+    <div class="seat-container" id="seatContainer" role="group" aria-label="Available and booked seats">
+      {% for seat in seats %}<button type="button" class="seat {% if seat.is_booked %}seat-booked{% else %}seat-available{% endif %}" data-seat-id="{{ seat.seat_id }}" data-seat-number="{{ seat.seat_number }}" data-seat-type="{{ seat.seat_type }}" aria-label="Seat {{ seat.seat_number }}, {{ seat.seat_type }}{% if seat.is_booked %}, booked{% endif %}" {% if seat.is_booked %}disabled{% else %}aria-pressed="false"{% endif %} title="{{ seat.seat_number }} · {{ seat.seat_type|title }}">{{ seat.seat_number }}</button>{% else %}<p>No seats are available for this screen.</p>{% endfor %}
+    </div><p class="sc-seat-hint">Select a seat to add it. Select it again to remove it.</p>
+  </section>
+  <aside class="card booking-summary-card"><div class="card-body"><h2>Your booking</h2><h3 class="sc-movie-title">{{ show.title }}</h3><p class="sc-meta">{{ show.theatre_name }}<br>{{ show.show_date }} · {{ show.show_time }}</p><div class="summary-row"><span>Price per seat</span><strong>₹{{ current_price }}</strong></div><div class="summary-row"><span>Seats selected</span><strong id="selectedSeatCount">0</strong></div><div id="selectedSeatNumbers" class="selected-seat-list" aria-live="polite">No seats selected</div><hr><div class="summary-total"><span>Total</span><strong id="totalAmount">₹0.00</strong></div>
+    <form method="POST" action="{{ url_for('book_show', show_id=show.show_id) }}" id="bookingForm" class="mt-4"><input type="hidden" name="selected_seats" id="selectedSeatsInput"><button type="submit" class="btn btn-primary w-100" id="bookButton" disabled>Select seats to continue</button></form><button type="button" class="btn btn-secondary w-100 mt-2" data-clear-seats disabled>Clear selection</button><p class="sc-meta mt-3">The final price is confirmed when you reserve your seats.</p><noscript><p class="alert alert-warning">Enable JavaScript to select seats and continue.</p></noscript>
+  </div></aside>
+</div>
+{% endblock %}

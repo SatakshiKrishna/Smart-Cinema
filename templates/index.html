@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% from 'partials/movie_card.html' import movie_card %}
+{% block title %}Movies & recommendations · SmartCinema{% endblock %}
+{% block content %}
+<section class="sc-hero" aria-labelledby="hero-title">
+  <div class="sc-hero-copy"><p class="eyebrow">The big screen is calling</p><h1 id="hero-title">A little escape.<br>A bigger experience.</h1><p>Discover your next favourite film, find a show near you, and make the best seats yours.</p><div class="action-buttons"><a class="btn btn-primary" href="{{ url_for('nearby_shows') }}">Find nearby shows</a><a class="btn btn-secondary" href="{{ url_for('personal_recommendations') }}">My recommendations</a></div></div>
+  <div class="sc-hero-art"><span class="eyebrow">{% if movies %}Now showing{% else %}Your next movie night{% endif %}</span><strong>{{ movies[0].title if movies else 'LIGHTS. CAMERA. CINEMA.' }}</strong><span>{% if movies %}{{ movies[0].language }}{% if movies[0].duration_minutes %} · {{ movies[0].duration_minutes }} min{% endif %}{% else %}Make it a movie night.{% endif %}</span></div>
+</section>
+<section id="recommendations" class="sc-section" aria-labelledby="recommendation-title">
+  <div class="sc-section-heading"><div><p class="eyebrow">Discover something you’ll love</p><h2 id="recommendation-title">Recommended for you</h2><p class="text-muted">Suggestions shaped by your confirmed bookings and movie ratings.</p></div><a class="btn btn-secondary" href="{{ url_for('personal_recommendations') }}">View recommendations →</a></div>
+  {% if personalized_recommendations %}<div class="sc-movie-grid">{% for movie in personalized_recommendations[:4] %}{{ movie_card(movie, recommended=true) }}{% endfor %}</div>
+  {% else %}<div class="sc-empty sc-recommendation-intro"><div><h3>{% if session.get('role') == 'customer' %}Your next favourite starts here.{% else %}A movie list made for you.{% endif %}</h3><p>{% if session.get('role') == 'customer' %}Book and rate a film to start building your personal recommendations. You can explore similar movies on any movie card right now.{% else %}Sign in as a customer to get personalised suggestions. Or explore similar movies below—no history needed.{% endif %}</p></div><a class="btn btn-primary" href="{{ url_for('personal_recommendations') }}">Explore recommendations</a></div>{% endif %}
+</section>
+<section id="now-showing" class="sc-section" data-catalogue aria-labelledby="now-title">
+  <div class="sc-section-heading"><div><h2 id="now-title">Now showing</h2><p class="text-muted">Find your film. Pick your seats. Make a night of it.</p></div><span class="sc-count" data-result-count aria-live="polite">{{ movies|length }} movies</span></div>
+  {% if movies %}
+  <div class="sc-filter-bar" data-enhanced hidden>
+    <label class="sc-search">Search movies<input type="search" class="form-control" data-movie-search placeholder="Search by title…" autocomplete="off"></label>
+    <label>Language<select class="form-select" data-movie-language><option value="">All languages</option>{% for language in movies|map(attribute='language')|reject('none')|unique|sort %}<option value="{{ language }}">{{ language }}</option>{% endfor %}</select></label>
+    <label>Sort by<select class="form-select" data-movie-sort><option value="title">Title A–Z</option><option value="rating">Highest rated</option></select></label>
+    <button type="button" class="btn btn-secondary" data-filter-reset>Reset</button>
+  </div>
+  <div class="sc-movie-grid" data-movie-grid>{% for movie in movies %}{{ movie_card(movie, filterable=true) }}{% endfor %}</div>
+  <div class="sc-empty" data-filter-empty hidden><h3>No movies match your search.</h3><p>Try another title or language.</p><button type="button" class="btn btn-secondary" data-filter-reset>Clear filters</button></div>
+  {% else %}<div class="sc-empty"><h3>The next show is on its way.</h3><p>No movies are currently showing. Check back soon.</p></div>{% endif %}
+</section>
+{% endblock %}

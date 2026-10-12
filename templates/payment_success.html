@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Your ticket · SmartCinema{% endblock %}
+{% block content %}
+<div class="sc-page-heading"><p class="eyebrow">Booking confirmed</p><h1>You’re going to the movies!</h1><p>Your ticket details are below.</p></div>
+<article class="card sc-ticket"><div class="card-body p-4 p-md-5"><div class="sc-section-heading"><span class="eyebrow">SmartCinema ticket</span><span class="badge bg-success">{{ booking.booking_status|title }}</span></div><h2>{{ booking.title }}</h2><p class="text-muted">{{ booking.theatre_name }} · {{ booking.screen_name }}</p><dl class="sc-ticket-details"><div><dt>Date</dt><dd>{{ booking.show_date }}</dd></div><div><dt>Time</dt><dd>{{ booking.show_time }}</dd></div><div><dt>Seats</dt><dd>{% for seat in booked_seats %}{{ seat.seat_number }}{% if not loop.last %}, {% endif %}{% endfor %}</dd></div><div><dt>Total</dt><dd>₹{{ booking.total_amount }}</dd></div></dl><p class="sc-meta">Booking ID: #{{ booking.booking_id }}</p>
+<p class="sc-meta">Payment: {{ booking.payment_method|replace('_', ' ')|title }} · {{ booking.payment_status|title }}</p><div class="action-buttons no-print"><button class="btn btn-primary" type="button" data-print-ticket>Print ticket</button><a class="btn btn-secondary" href="{{ url_for('my_bookings') }}">My bookings</a><a class="btn btn-outline-warning" href="{{ url_for('personal_recommendations') }}">Find your next movie</a></div>
+</div></article>
+{% endblock %}

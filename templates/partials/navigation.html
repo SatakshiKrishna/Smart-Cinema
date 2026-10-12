@@ -1,0 +1,23 @@
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header class="sc-header">
+  <nav class="container sc-nav" aria-label="Main navigation">
+    <a class="sc-brand" href="{{ url_for('home') }}"><span aria-hidden="true">◉</span> SmartCinema</a>
+    <button class="sc-menu-toggle" type="button" aria-expanded="false" aria-controls="sc-menu">Menu <span aria-hidden="true">☰</span></button>
+    <div class="sc-menu" id="sc-menu">
+      <a class="sc-nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}#now-showing">Movies</a>
+      <a class="sc-nav-link {% if request.endpoint == 'nearby_shows' %}active{% endif %}" href="{{ url_for('nearby_shows') }}">Nearby theatres</a>
+      <a class="sc-nav-link {% if request.endpoint in ['personal_recommendations', 'movie_recommendations'] %}active{% endif %}" href="{{ url_for('personal_recommendations') }}">Recommendations</a>
+      {% if session.get('role') == 'customer' %}<a class="sc-nav-link {% if request.endpoint == 'my_bookings' %}active{% endif %}" href="{{ url_for('my_bookings') }}">My bookings</a>{% endif %}
+      {% if session.get('role') == 'admin' %}<a class="sc-nav-link {% if request.endpoint.startswith('admin_') %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">Admin dashboard</a>{% endif %}
+      <div class="sc-account">
+        {% if session.get('user_id') %}
+          <span class="sc-user">{{ session.get('user_name', 'Movie lover') }}</span>
+          <a class="btn btn-secondary" href="{{ url_for('logout') }}">Sign out</a>
+        {% else %}
+          <a class="btn btn-secondary" href="{{ url_for('login') }}">Sign in</a>
+          <a class="btn btn-primary" href="{{ url_for('register') }}">Create account</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+</header>

@@ -1,0 +1,7 @@
+# Direct dependencies. pip installs their compatible sub-dependencies automatically.
+# Recommended Python: 3.11 or 3.12.
+Flask>=3.0,<4.0
+mysql-connector-python>=8.3,<27.0
+python-dotenv>=1.0,<2.0
+pandas>=2.1,<4.0
+scikit-learn>=1.4,<2.0

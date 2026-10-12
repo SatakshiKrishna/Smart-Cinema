@@ -1,0 +1,24 @@
+{% macro movie_card(movie, recommended=false, filterable=false) %}
+<article class="card sc-movie-card {% if recommended %}recommendation-card{% endif %}"
+  {% if filterable %}data-movie-card data-title="{{ movie.title }}" data-language="{{ movie.language or '' }}" data-rating="{{ movie.average_rating|default(0, true) }}"{% endif %}>
+  <div class="sc-poster">
+    <div class="sc-poster-fallback"><span class="eyebrow">{% if recommended %}Picked for you{% else %}SmartCinema select{% endif %}</span><strong>{{ movie.title }}</strong><span>{{ (movie.status|default('now_showing', true))|replace('_', ' ')|title }}</span></div>
+    {% if movie.poster_url %}<img src="{{ movie.poster_url }}" alt="{{ movie.title }} poster" loading="lazy" data-poster>{% endif %}
+  </div>
+  <div class="card-body">
+    {% if recommended %}<span class="badge sc-recommendation-badge">Recommended</span>{% endif %}
+    <h3 class="sc-movie-title">{{ movie.title }}</h3>
+    <p class="sc-meta">{{ movie.language or 'Language not listed' }}{% if movie.duration_minutes %} · {{ movie.duration_minutes }} min{% endif %}{% if movie.age_rating %} · {{ movie.age_rating }}{% endif %}</p>
+    {% if movie.genres %}<p class="sc-meta">{{ movie.genres }}</p>{% endif %}
+    {% if movie.review_count is defined %}
+      <p class="rating-text">{% if movie.review_count %}★ {{ movie.average_rating }}/5 <span class="text-muted">({{ movie.review_count }} reviews)</span>{% else %}<span class="text-muted">No ratings yet</span>{% endif %}</p>
+    {% endif %}
+    {% if movie.description %}<p class="sc-description">{{ movie.description }}</p>{% endif %}
+    {% if movie.similarity_score is defined %}<details class="sc-score"><summary>Why this recommendation?</summary><p>Based on genre, language, age rating and description{% if recommended %}, weighted by your booking and rating history{% endif %}.</p><p>Ranking score: {{ movie.similarity_score }}. This is a similarity score, not a probability.</p></details>{% endif %}
+  </div>
+  <div class="card-footer">
+    {% if movie.status|default('now_showing') == 'now_showing' %}<a class="btn btn-primary w-100" href="{{ url_for('movie_shows', movie_id=movie.movie_id) }}">View showtimes</a>{% else %}<span class="badge bg-secondary">{{ movie.status|replace('_', ' ')|title }}</span>{% endif %}
+    <div class="sc-card-links"><a href="{{ url_for('movie_recommendations', movie_id=movie.movie_id) }}">Similar movies</a><a href="{{ url_for('movie_reviews', movie_id=movie.movie_id) }}">Reviews</a></div>
+  </div>
+</article>
+{% endmacro %}

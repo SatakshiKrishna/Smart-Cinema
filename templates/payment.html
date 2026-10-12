@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Payment · SmartCinema{% endblock %}
+{% block content %}
+<a class="sc-back" href="{{ url_for('my_bookings') }}">← My bookings</a>
+<div class="sc-page-heading"><h1>One last step.</h1><p>Choose how you would like to pay for booking #{{ booking.booking_id }}.</p></div>
+<div class="sc-payment-layout"><section class="card"><div class="card-body p-4 p-lg-5"><h2>Payment method</h2><form method="POST" action="{{ url_for('process_payment', booking_id=booking.booking_id) }}">
+<fieldset><legend class="sc-meta">Choose one option</legend><div class="sc-payment-options">{% for value, label in [('upi', 'UPI'), ('card', 'Debit / Credit card'), ('net_banking', 'Net banking'), ('cash', 'Cash')] %}<label class="sc-payment-option"><input type="radio" name="payment_method" value="{{ value }}" required {% if loop.first %}checked{% endif %}><span>{{ label }}</span></label>{% endfor %}</div></fieldset><div class="sc-callout mt-4"><strong>Simulated payment</strong><p>This project records a demonstration payment. No money is charged and no card or UPI details are needed.</p></div><button class="btn btn-primary btn-lg" type="submit">Confirm payment · ₹{{ booking.total_amount }}</button></form></div></section><aside class="card"><div class="card-body p-4"><h2>Order summary</h2><p class="sc-meta">Booking #{{ booking.booking_id }}</p><div class="summary-total"><span>Amount</span><strong>₹{{ booking.total_amount }}</strong></div><p class="sc-meta mt-4">Your reserved seats and booking total will be confirmed after payment.</p></div></aside></div>
+{% endblock %}

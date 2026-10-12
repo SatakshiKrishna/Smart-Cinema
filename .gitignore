@@ -1,0 +1,18 @@
+.env
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vscode/
+.idea/
+.DS_Store
+*.log
+# Personal backups, local databases and temporary editor files
+backups/
+*.sql.gz
+*.dump
+*.bak
+*.sqlite3
+.env.*
+!.env.example

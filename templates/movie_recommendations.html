@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% from 'partials/movie_card.html' import movie_card %}
+{% block title %}Movies like {{ selected_movie.title }} · SmartCinema{% endblock %}
+{% block content %}
+<a class="sc-back" href="{{ url_for('personal_recommendations') }}">← All recommendations</a>
+<div class="sc-hero sc-hero-compact"><div><p class="eyebrow">Find more of what you love</p><h1>Movies like<br>{{ selected_movie.title }}</h1><p>Related films, ranked by similarity in genre, language, age rating and description.</p><a class="btn btn-secondary" href="{{ url_for('movie_shows', movie_id=selected_movie.movie_id) }}">Back to {{ selected_movie.title }}</a></div></div>
+<section class="sc-section"><h2>Similar movies</h2><p class="text-muted">The closest matches appear first.</p>{% if recommendations %}<div class="sc-movie-grid">{% for movie in recommendations %}{{ movie_card(movie) }}{% endfor %}</div>{% else %}<div class="sc-empty"><h3>No similar films yet.</h3><p>Try another movie or check back when the catalogue grows.</p><a class="btn btn-primary" href="{{ url_for('home') }}">Explore movies</a></div>{% endif %}</section>
+{% endblock %}

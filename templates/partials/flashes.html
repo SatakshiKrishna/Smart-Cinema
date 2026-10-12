@@ -1,0 +1,3 @@
+{% for message in get_flashed_messages() %}
+<div class="alert alert-info sc-flash" role="status"><span>{{ message }}</span><button type="button" class="sc-dismiss" aria-label="Dismiss notification">×</button></div>
+{% endfor %}

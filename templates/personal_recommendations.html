@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% from 'partials/movie_card.html' import movie_card %}
+{% block title %}Your recommendations · SmartCinema{% endblock %}
+{% block content %}
+<div class="sc-page-heading"><p class="eyebrow">SmartCinema recommendations</p><h1>Your next favourite is here.</h1><p>Personal picks from your history, plus similar films to explore.</p></div>
+<section class="sc-section" aria-labelledby="personal-heading">
+  <h2 id="personal-heading">Recommended for you</h2>
+  {% if recommendations %}
+    <div class="sc-callout"><strong>Inspired by what you watch and rate</strong><p>Your confirmed bookings and movie ratings help rank these films. Higher ratings have more influence.</p></div>
+    <div class="sc-movie-grid">{% for movie in recommendations %}{{ movie_card(movie, recommended=true) }}{% endfor %}</div>
+  {% else %}
+    <div class="sc-empty"><h3>{% if session.get('role') == 'customer' %}Let’s get to know your taste.{% else %}Sign in for your personal picks.{% endif %}</h3><p>{% if session.get('role') == 'customer' %}There are no personal suggestions yet. Book and rate a movie, or explore similar films from the selection below.{% else %}Personal recommendations use a customer account’s confirmed bookings and ratings. You can still discover similar movies below.{% endif %}</p>{% if not session.get('user_id') %}<a class="btn btn-primary" href="{{ url_for('login') }}">Sign in</a>{% else %}<a class="btn btn-primary" href="{{ url_for('home') }}#now-showing">Browse movies</a>{% endif %}</div>
+  {% endif %}
+</section>
+<section class="sc-section"><div class="sc-section-heading"><div><h2>Start with a movie you like</h2><p class="text-muted">Choose “Similar movies” to discover related titles. These are catalogue titles, not personalised picks.</p></div></div>
+{% if movies %}<div class="sc-movie-grid">{% for movie in movies %}{{ movie_card(movie) }}{% endfor %}</div>{% else %}<p class="sc-empty">No movies are currently showing.</p>{% endif %}
+</section>
+<details class="sc-callout"><summary>How recommendations work</summary><p>SmartCinema compares genre, language, age rating and description using TF-IDF and cosine similarity. Personal suggestions combine these similarities with your confirmed booking history and review ratings, and exclude films you have already booked or reviewed.</p></details>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}Nearby Theatres & Showtimes · SmartCinema{% endblock %}
+
+{% block content %}
+<section class="sc-page-heading">
+  <p class="eyebrow">Discover cinemas around you</p>
+  <h1>Nearby theatres & movie showtimes</h1>
+  <p>Search for theatres, compare movie timings, check available seats, and choose your show.</p>
+</section>
+
+<section class="sc-callout">
+  <form id="nearby-search" action="{{ url_for('nearby_shows') }}" method="get" class="sc-filter-bar">
+    <label class="sc-search">
+      Search by city
+      <input class="form-control" type="text" name="city" list="cinema-cities"
+             value="{{ selected_city }}" placeholder="For example, Pune">
+      <datalist id="cinema-cities">
+        {% for city in cities %}<option value="{{ city }}">{% endfor %}
+      </datalist>
+    </label>
+    <input type="hidden" name="lat" id="nearby-lat" value="{{ latitude }}">
+    <input type="hidden" name="lon" id="nearby-lon" value="{{ longitude }}">
+    <button class="btn btn-primary" type="submit">Find shows</button>
+    <button class="btn btn-secondary" type="button" id="use-location">Use my location</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('nearby_shows') }}">Clear</a>
+  </form>
+  <p class="sc-meta" id="location-status" role="status" aria-live="polite">
+    Location is optional and used only for approximate straight-line distance sorting.
+    Theatres marked “Demo” are fictional sample entries, not real cinema listings.
+  </p>
+</section>
+
+<section class="sc-section" id="upcoming-shows">
+  <div class="sc-section-heading">
+    <h2>Available shows</h2>
+    <p class="sc-meta" id="nearby-result-count" aria-live="polite">
+      {{ shows|length }} upcoming show{{ '' if shows|length == 1 else 's' }}
+      {% if latitude %} · nearest first where coordinates are available{% endif %}
+    </p>
+  </div>
+
+  {% if shows %}
+  <div class="sc-filter-bar">
+    <label class="sc-search">
+      Filter by movie
+      <select id="nearby-movie-filter" class="form-select" aria-label="Filter shows by movie">
+        <option value="">All movies</option>
+        {% for group in shows|groupby('movie_title') %}
+        <option value="{{ group.grouper }}">{{ group.grouper }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Show date
+      <select id="nearby-date-filter" class="form-select" aria-label="Filter shows by date">
+        <option value="">All dates</option>
+        {% for group in shows|groupby('show_date') %}
+        <option value="{{ group.grouper }}">{{ group.grouper }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="btn btn-outline-secondary" type="button" id="nearby-clear-filters">Reset filters</button>
+  </div>
+
+  <div class="sc-show-grid" id="nearby-show-grid">
+    {% for show in shows %}
+    <article class="card sc-show-card" data-nearby-show
+             data-movie="{{ show.movie_title }}" data-date="{{ show.show_date }}">
+      <div class="card-body">
+        <p class="eyebrow">{{ show.movie_title }}</p>
+        <h3>{{ show.theatre_name }}</h3>
+        <p class="sc-meta">{{ show.city }} · {{ show.screen_name }} · {{ show.language }}</p>
+        <p class="sc-meta">
+          {{ show.address }}
+          {% if show.distance_km is not none %}
+          · <strong>{{ show.distance_km }} km (approx.)</strong>
+          {% endif %}
+        </p>
+        <div class="sc-showtime">
+          <span>{{ show.show_date }} · Showtime</span>
+          <strong>{{ show.show_time }}</strong>
+        </div>
+        <p><strong>{{ show.available_seats }}</strong> of {{ show.total_seats }} seats available</p>
+        {% if show.total_seats > 0 %}
+        <div class="progress mb-3" role="progressbar" aria-label="Seat availability"
+             aria-valuenow="{{ show.available_seats }}" aria-valuemin="0" aria-valuemax="{{ show.total_seats }}">
+          <div class="progress-bar bg-success"
+               style="width: {{ (100 * show.available_seats / show.total_seats)|round(0) }}%"></div>
+        </div>
+        {% endif %}
+        <p class="sc-meta">Base price: ₹{{ show.base_price }} · Final price shown at seat selection</p>
+      </div>
+      <div class="card-footer">
+        {% if show.available_seats > 0 %}
+        <a class="btn btn-primary w-100" href="{{ url_for('select_seats', show_id=show.show_id) }}">
+          View & choose seats
+        </a>
+        {% else %}
+        <span class="btn btn-secondary disabled w-100">Sold out</span>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  <div class="sc-empty" id="nearby-filter-empty" hidden>
+    <h3>No shows match these filters</h3>
+    <p>Select a different movie or date, or reset filters.</p>
+  </div>
+  {% else %}
+  <div class="sc-empty">
+    <h3>No upcoming shows found</h3>
+    <p>Try another city or ask the admin to schedule future shows.</p>
+  </div>
+  {% endif %}
+</section>
+
+<script>
+(() => {
+  const button = document.getElementById('use-location');
+  const status = document.getElementById('location-status');
+  if (button && status) {
+    button.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        status.textContent = 'Location is not supported by this browser. Please use city search.';
+        return;
+      }
+      status.textContent = 'Requesting permission to use your location…';
+      navigator.geolocation.getCurrentPosition((position) => {
+        document.getElementById('nearby-lat').value = position.coords.latitude.toFixed(6);
+        document.getElementById('nearby-lon').value = position.coords.longitude.toFixed(6);
+        document.getElementById('nearby-search').submit();
+      }, () => {
+        status.textContent = 'Location unavailable or permission denied. Please use city search.';
+      }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 120000 });
+    });
+  }
+
+  const movieFilter = document.getElementById('nearby-movie-filter');
+  const dateFilter = document.getElementById('nearby-date-filter');
+  const cards = [...document.querySelectorAll('[data-nearby-show]')];
+  const count = document.getElementById('nearby-result-count');
+  const empty = document.getElementById('nearby-filter-empty');
+  const reset = document.getElementById('nearby-clear-filters');
+  if (!movieFilter || !dateFilter) return;
+
+  function applyFilters() {
+    let visible = 0;
+    cards.forEach((card) => {
+      const matchesMovie = !movieFilter.value || card.dataset.movie === movieFilter.value;
+      const matchesDate = !dateFilter.value || card.dataset.date === dateFilter.value;
+      const showCard = matchesMovie && matchesDate;
+      card.hidden = !showCard;
+      if (showCard) visible++;
+    });
+    if (count) count.textContent = `${visible} of ${cards.length} upcoming shows`;
+    if (empty) empty.hidden = visible > 0;
+  }
+  movieFilter.addEventListener('change', applyFilters);
+  dateFilter.addEventListener('change', applyFilters);
+  reset.addEventListener('click', () => {
+    movieFilter.value = '';
+    dateFilter.value = '';
+    applyFilters();
+  });
+})();
+</script>
+{% endblock %}
